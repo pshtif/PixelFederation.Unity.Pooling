@@ -43,7 +43,7 @@ namespace Pixel.Pool
         private void CreateInstance()
         {
             GameObject instance = Object.Instantiate(objectPrototype);
-            GameObject.DontDestroyOnLoad(instance);
+            if (dontDestroyOnLoad) GameObject.DontDestroyOnLoad(instance);
             instance.SetActive(false);
             _freeStack.Push(instance);
         }
