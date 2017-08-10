@@ -15,18 +15,22 @@ namespace Pixel.Pool
 
         public int maxSize;
         public bool expandable = true;
+        public bool dontDestroyOnLoad = false;
 
         public int GetUsedCount()
         {
             return _usedPool.Count;
         }
 
-        public ObjectPool(ObjectPoolManager p_manager, int p_initialSize, GameObject p_objectPrototype)
+        public ObjectPool(ObjectPoolManager p_manager, int p_initialSize, GameObject p_objectPrototype, bool p_dontDestroyOnLoad)
         {
             if (p_objectPrototype == null) throw new System.Exception("Cannot use null as pool prototype.");
+
             _manager = p_manager;
             _initialSize = p_initialSize;
             objectPrototype = p_objectPrototype;
+            dontDestroyOnLoad = p_dontDestroyOnLoad;
+
             _freeStack = new Stack<GameObject>();
             _usedPool = new List<GameObject>();
 
@@ -39,6 +43,7 @@ namespace Pixel.Pool
         private void CreateInstance()
         {
             GameObject instance = Object.Instantiate(objectPrototype);
+            GameObject.DontDestroyOnLoad(instance);
             instance.SetActive(false);
             _freeStack.Push(instance);
         }
@@ -93,6 +98,17 @@ namespace Pixel.Pool
         public void ReturnInstance<T>(T p_instance) where T : Component
         {
             ReturnInstance(p_instance.gameObject);
+        }
+
+        public void Dispose()
+        {
+            while (_freeStack.Count > 0) Object.Destroy(_freeStack.Pop());
+            while (_usedPool.Count > 0)
+            {
+                GameObject instance = _usedPool[0];
+                GameObject.Destroy(instance);
+                _usedPool.Remove(instance);
+            }
         }
     }
 }

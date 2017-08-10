@@ -23,10 +23,10 @@ namespace Pixel.Pool
             _pools = new Dictionary<string, ObjectPool>();
         }
 
-        static public ObjectPool AllocatePool(string p_name, GameObject p_objectPrototype, int p_initSize, bool p_expandable, int p_maxSize)
+        static public ObjectPool AllocatePool(string p_name, GameObject p_objectPrototype, int p_initSize, bool p_expandable, int p_maxSize, bool p_dontDestroyOnLoad)
         {
             if (!_initialized) Initialize();
-            ObjectPool pool = new ObjectPool(_instance, p_initSize, p_objectPrototype);
+            ObjectPool pool = new ObjectPool(_instance, p_initSize, p_objectPrototype, p_dontDestroyOnLoad);
             pool.expandable = p_expandable;
             pool.maxSize = p_maxSize;
             _pools.Add(p_name, pool);
@@ -37,6 +37,15 @@ namespace Pixel.Pool
         {
             if (!_initialized) Initialize();
             return _pools[p_name];
+        }
+
+        static public void Dispose()
+        {
+            foreach (ObjectPool pool in _pools.Values)
+            {
+                pool.Dispose();
+            }
+            _pools.Clear();
         }
     }
 }
